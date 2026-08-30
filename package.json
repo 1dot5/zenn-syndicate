@@ -49,9 +49,6 @@
     "tinyglobby": "^0.2.10",
     "yaml": "^2.6.1"
   },
-  "optionalDependencies": {
-    "sharp": "^0.34.2"
-  },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "oxlint": "^0.15.7",
