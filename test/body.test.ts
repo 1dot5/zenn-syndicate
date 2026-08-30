@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  findExcludedRanges,
-  findLocalImageRefs,
-  insertNotice,
-  rewriteImagePaths,
-} from "../src/body.js";
+import { findExcludedRanges, findLocalImageRefs, rewriteImagePaths } from "../src/body.js";
 
 describe("findExcludedRanges", () => {
   it("finds no ranges in plain text", () => {
@@ -114,31 +109,5 @@ describe("findLocalImageRefs", () => {
     ].join("\n");
     const refs = findLocalImageRefs(body);
     expect(refs.map((r) => r.rawPath)).toEqual(["a.png", "e.png"]);
-  });
-});
-
-describe("insertNotice", () => {
-  it("substitutes {sourceUrl} when canonicalUrl is present", () => {
-    const result = insertNotice(
-      "Hello world",
-      "Originally posted at {sourceUrl}.",
-      "https://x.example/post",
-    );
-    expect(result.skipped).toBe(false);
-    expect(result.body.startsWith("> Originally posted at https://x.example/post.")).toBe(true);
-    expect(result.body).toContain("Hello world");
-  });
-
-  it("skips insertion when the template needs {sourceUrl} but canonicalUrl is missing", () => {
-    const original = "Hello world";
-    const result = insertNotice(original, "Originally posted at {sourceUrl}.", undefined);
-    expect(result.skipped).toBe(true);
-    expect(result.body).toBe(original);
-  });
-
-  it("always inserts a template with no {sourceUrl} placeholder", () => {
-    const result = insertNotice("Hello world", "This is a syndicated copy.", undefined);
-    expect(result.skipped).toBe(false);
-    expect(result.body.startsWith("> This is a syndicated copy.")).toBe(true);
   });
 });

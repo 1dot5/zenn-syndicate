@@ -71,12 +71,6 @@ export default defineConfig({
     published: false,
     topics: [],
   },
-  notice: {
-    enabled: true,
-    // {sourceUrl} は front matter の canonicalUrl に置換される。
-    // canonicalUrl が無い記事では notice 全体を挿入しない（info診断を出す）
-    text: "この記事は {sourceUrl} で公開したものをZenn向けに変換しています。",
-  },
   lockFile: ".zenn-syndicate.lock.json", // cwdからの相対
 });
 ```
@@ -98,7 +92,6 @@ export default defineConfig({
 - `topics: string[]`（省略時は `defaults.topics`。6個以上はエラー診断、Zenn上限は5個）
 - `published: boolean`（省略時は `defaults.published`）
 - `slug: string`（省略時はファイル名から生成。生成規則は§7）
-- `canonicalUrl: string`（notice用。無くてもエラーにはしない）
 
 front matter に存在しないキーは無視する（他ツール用のメタデータが混ざっていてもよい）。
 
@@ -166,14 +159,6 @@ published: true
 
 Markdownパーサは使わず自前スキャンでよいが、テストケースを厚く書く（§12参照）。
 
-### 10.2 notice挿入
-
-`notice.enabled` が true のとき、本文の先頭（front matter直後の最初の非空行の前）に1行、`> ` で始まる blockquote として挿入する。
-
-- `notice.text` に `{sourceUrl}` が含まれていて、source front matterに `canonicalUrl` が無い場合は、その記事へのnotice挿入をスキップし、info診断 (`notice-skipped-no-canonical-url`) を出す
-- `{sourceUrl}` が含まれていて `canonicalUrl` がある場合は単純文字列置換する
-- `{sourceUrl}` を含まないテンプレートなら常に挿入する
-
 ## 11. ロックファイル
 
 前回buildの結果を記録し、差分検出に使う。パスは `lockFile`（cwd相対）。
@@ -208,7 +193,7 @@ type DiagnosticLevel = "error" | "warning" | "info";
 
 interface Diagnostic {
   level: DiagnosticLevel;
-  code: string; // 例: "invalid-slug", "image-not-found", "duplicate-slug", "unchanged", "orphaned-output", "notice-skipped-no-canonical-url"
+  code: string; // 例: "invalid-slug", "image-not-found", "duplicate-slug", "unchanged", "orphaned-output"
   message: string;
   file?: string; // ソースファイルの相対パス
   slug?: string;
@@ -252,7 +237,7 @@ src/
   collect.ts        globでソースを集めて SourceDoc[] にする
   slug.ts           slug の解決と検証
   frontmatter.ts    Zenn front matter の構築と文字列化
-  body.ts           画像パス書き換え、notice挿入
+  body.ts           画像パス書き換え
   assets.ts         画像の解決、検証、コピー
   lock.ts           ロックファイルの読み書きと差分検出
   emit.ts           出力ディレクトリへの書き出し
@@ -302,8 +287,6 @@ test/
 - `~~~` によるフェンスドコードブロックも同様に除外される
 - http(s)で始まる画像パスは書き換えない
 - 除外区間の外にある複数の画像参照が正しくすべて書き換わる
-- notice挿入: `canonicalUrl` ありでプレースホルダーが置換される
-- notice挿入: `canonicalUrl` なしでプレースホルダーを含むtextの場合は挿入されず info診断が出る
 
 ### collect.ts / assets.ts / lock.ts / emit.ts
 

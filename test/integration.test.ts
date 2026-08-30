@@ -34,7 +34,6 @@ describe("build / check integration", () => {
         "export default {",
         `  source: { dir: ${JSON.stringify(sourceDir)} },`,
         `  output: { dir: ${JSON.stringify(outputDir)} },`,
-        "  notice: { enabled: false },",
         `  lockFile: ${JSON.stringify(path.join(root, ".zenn-syndicate.lock.json"))},`,
         "};",
         "",

@@ -30,7 +30,6 @@ export interface SourceFrontMatter {
   topics?: unknown;
   published?: unknown;
   slug?: unknown;
-  canonicalUrl?: unknown;
   [key: string]: unknown;
 }
 
@@ -90,11 +89,6 @@ export interface ProcessedDoc {
   hasError: boolean;
 }
 
-export interface NoticeConfig {
-  enabled: boolean;
-  text: string;
-}
-
 export interface SourceConfig {
   dir: string;
   include: string[];
@@ -117,7 +111,6 @@ export interface ResolvedConfig {
   source: SourceConfig;
   output: OutputConfig;
   defaults: DefaultsConfig;
-  notice: NoticeConfig;
   lockFile: string;
   /** Absolute path to the directory the config file lives in. */
   configDir: string;
@@ -128,7 +121,6 @@ export interface ZennSyndicateConfig {
   source: Partial<SourceConfig> & { dir: string };
   output: Partial<OutputConfig> & { dir: string };
   defaults?: Partial<DefaultsConfig>;
-  notice?: Partial<NoticeConfig>;
   lockFile?: string;
 }
 

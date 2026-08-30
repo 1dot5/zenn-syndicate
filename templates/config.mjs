@@ -20,11 +20,5 @@ export default defineConfig({
     published: false,
     topics: [],
   },
-  notice: {
-    enabled: true,
-    // {sourceUrl} is replaced with the article's front matter `canonicalUrl`.
-    // If an article has no canonicalUrl, the notice is skipped for it.
-    text: "この記事は {sourceUrl} で公開したものをZenn向けに変換しています。",
-  },
   lockFile: ".zenn-syndicate.lock.json",
 });

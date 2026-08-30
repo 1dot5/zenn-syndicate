@@ -4,7 +4,6 @@ import { pathToFileURL } from "node:url";
 import type {
   Diagnostic,
   DefaultsConfig,
-  NoticeConfig,
   OutputConfig,
   ResolvedConfig,
   SourceConfig,
@@ -22,8 +21,6 @@ const DEFAULT_IMAGES_DIR = "images";
 const DEFAULT_TYPE = "tech" as const;
 const DEFAULT_PUBLISHED = false;
 const DEFAULT_TOPICS: string[] = [];
-const DEFAULT_NOTICE_ENABLED = true;
-const DEFAULT_NOTICE_TEXT = "この記事は {sourceUrl} で公開したものをZenn向けに変換しています。";
 export const DEFAULT_LOCK_FILE = ".zenn-syndicate.lock.json";
 
 export type ConfigResult =
@@ -124,10 +121,6 @@ export async function loadConfig(configPath: string, cwd: string): Promise<Confi
     published: userConfig.defaults?.published ?? DEFAULT_PUBLISHED,
     topics: userConfig.defaults?.topics ?? DEFAULT_TOPICS,
   };
-  const notice: NoticeConfig = {
-    enabled: userConfig.notice?.enabled ?? DEFAULT_NOTICE_ENABLED,
-    text: userConfig.notice?.text ?? DEFAULT_NOTICE_TEXT,
-  };
   const lockFile = path.resolve(configDir, userConfig.lockFile ?? DEFAULT_LOCK_FILE);
 
   // Existence checks happen before any document is processed — this is the
@@ -148,5 +141,5 @@ export async function loadConfig(configPath: string, cwd: string): Promise<Confi
   }
   if (diagnostics.length > 0) return { ok: false, diagnostics };
 
-  return { ok: true, config: { source, output, defaults, notice, lockFile, configDir } };
+  return { ok: true, config: { source, output, defaults, lockFile, configDir } };
 }

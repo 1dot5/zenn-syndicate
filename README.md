@@ -1,7 +1,7 @@
 # @1dot5/zenn-syndicate
 
 好きな場所（ブログ用リポジトリ、Obsidian vaultなど）に書いたMarkdown記事を、
-[Zenn](https://zenn.dev) が読み込める形式（front matter・画像パス・任意の転載通知）に変換し、
+[Zenn](https://zenn.dev) が読み込める形式（front matter・画像パス）に変換し、
 **既に存在する**ローカルのZenn連携用リポジトリのチェックアウトへ書き出すツールです。
 
 このパッケージはファイルを書き出すだけです。リポジトリの作成・clone・commit・push は一切行いません
@@ -55,12 +55,6 @@ export default defineConfig({
     published: false,
     topics: [],
   },
-  notice: {
-    enabled: true,
-    // {sourceUrl} は記事の front matter の canonicalUrl に置換される。
-    // canonicalUrl が無い記事ではnotice全体を挿入しない（info診断を出す）
-    text: "この記事は {sourceUrl} で公開したものをZenn向けに変換しています。",
-  },
   lockFile: ".zenn-syndicate.lock.json",
 });
 ```
@@ -73,15 +67,14 @@ export default defineConfig({
 `source.dir` 配下で `source.include` にマッチするMarkdownファイルはすべてソース記事として扱われます。
 front matterのフィールドは以下の通りです。
 
-| フィールド     | 必須 | 説明                                                                       |
-| -------------- | ---- | -------------------------------------------------------------------------- |
-| `title`        | 必須 | 空でない文字列                                                             |
-| `emoji`        | 必須 | 絵文字1文字ちょうど                                                        |
-| `type`         | 任意 | `"tech"` \| `"idea"`。省略時は `defaults.type`                             |
-| `topics`       | 任意 | 文字列配列、最大5個。省略時は `defaults.topics`                            |
-| `published`    | 任意 | 真偽値。省略時は `defaults.published`                                      |
-| `slug`         | 任意 | `/^[0-9a-z-_]{12,50}$/` に一致する必要あり。省略時はファイル名から自動生成 |
-| `canonicalUrl` | 任意 | notice内の `{sourceUrl}` に使われる                                        |
+| フィールド  | 必須 | 説明                                                                       |
+| ----------- | ---- | -------------------------------------------------------------------------- |
+| `title`     | 必須 | 空でない文字列                                                             |
+| `emoji`     | 必須 | 絵文字1文字ちょうど                                                        |
+| `type`      | 任意 | `"tech"` \| `"idea"`。省略時は `defaults.type`                             |
+| `topics`    | 任意 | 文字列配列、最大5個。省略時は `defaults.topics`                            |
+| `published` | 任意 | 真偽値。省略時は `defaults.published`                                      |
+| `slug`      | 任意 | `/^[0-9a-z-_]{12,50}$/` に一致する必要あり。省略時はファイル名から自動生成 |
 
 ```md
 ---
@@ -90,7 +83,6 @@ emoji: "⚡"
 type: "tech"
 topics: ["typescript", "tsdown"]
 published: true
-canonicalUrl: "https://blog.example.com/faster-typescript-builds"
 ---
 
 本文はここから。

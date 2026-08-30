@@ -41,7 +41,6 @@ describe("loadConfig", () => {
     expect(result.config.output.imagesDir).toBe("images");
     expect(result.config.defaults.type).toBe("tech");
     expect(result.config.defaults.published).toBe(false);
-    expect(result.config.notice.enabled).toBe(true);
   });
 
   it("resolves relative dirs against the config file's directory", async () => {

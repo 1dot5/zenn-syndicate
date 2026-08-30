@@ -192,23 +192,3 @@ export function findLocalImageRefs(body: string): { rawPath: string }[] {
     .filter((m) => m.isLocal)
     .map((m) => ({ rawPath: m.rawPath }));
 }
-
-/**
- * Inserts a one-line blockquote notice at the start of the body. When the
- * template contains `{sourceUrl}` but no canonical URL is available, the
- * notice is skipped entirely (the caller is expected to report this).
- */
-export function insertNotice(
-  body: string,
-  noticeText: string,
-  canonicalUrl: string | undefined,
-): { body: string; skipped: boolean } {
-  const hasPlaceholder = noticeText.includes("{sourceUrl}");
-  if (hasPlaceholder && !canonicalUrl) {
-    return { body, skipped: true };
-  }
-
-  const text = hasPlaceholder ? noticeText.split("{sourceUrl}").join(canonicalUrl!) : noticeText;
-  const rest = body.replace(/^\n+/, "");
-  return { body: `> ${text}\n\n${rest}`, skipped: false };
-}

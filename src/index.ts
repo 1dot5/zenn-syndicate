@@ -1,5 +1,5 @@
 import path from "node:path";
-import { findLocalImageRefs, insertNotice, rewriteImagePaths } from "./body.js";
+import { findLocalImageRefs, rewriteImagePaths } from "./body.js";
 import { collectSourceDocs } from "./collect.js";
 import { loadConfig } from "./config.js";
 import { emit } from "./emit.js";
@@ -56,7 +56,6 @@ interface Prepared {
   doc: SourceDoc;
   slug?: string;
   fm?: ZennFrontMatterInput;
-  canonicalUrl?: string;
   hasError: boolean;
 }
 
@@ -143,9 +142,6 @@ function validateDoc(
     }
   }
 
-  const canonicalUrl =
-    typeof doc.frontMatter.canonicalUrl === "string" ? doc.frontMatter.canonicalUrl : undefined;
-
   const slugResult = resolveSlug(doc.relPath, doc.frontMatter.slug);
   if (slugResult.diagnostic) {
     diagnostics.push(slugResult.diagnostic);
@@ -157,7 +153,7 @@ function validateDoc(
     : { title: title as string, emoji: emoji as string, type, topics, published };
 
   return {
-    prepared: { doc, slug: slugResult.slug, fm, canonicalUrl, hasError },
+    prepared: { doc, slug: slugResult.slug, fm, hasError },
     diagnostics,
   };
 }
@@ -234,21 +230,7 @@ async function runPipeline(options: RunOptions, forceDryRun: boolean): Promise<R
     }
 
     const assetMap = new Map(assets.map((a) => [a.rawPath, a.outputRefPath]));
-    let body = rewriteImagePaths(p.doc.body, (rawPath) => assetMap.get(rawPath));
-
-    if (config.notice.enabled) {
-      const noticeResult = insertNotice(body, config.notice.text, p.canonicalUrl);
-      body = noticeResult.body;
-      if (noticeResult.skipped) {
-        diagnostics.push({
-          level: "info",
-          code: "notice-skipped-no-canonical-url",
-          message: "notice not inserted: front matter has no canonicalUrl",
-          file: p.doc.relPath,
-          slug: p.slug,
-        });
-      }
-    }
+    const body = rewriteImagePaths(p.doc.body, (rawPath) => assetMap.get(rawPath));
 
     const content = `${buildFrontMatter(p.fm)}${body}`;
 
