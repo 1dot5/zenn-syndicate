@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0](https://github.com/1dot5/zenn-syndicate/compare/zenn-syndicate-v0.2.0...zenn-syndicate-v0.3.0) (2026-08-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* `notice` is no longer a config field, and `canonicalUrl` is no longer a recognized front matter key. Both are silently ignored now rather than doing anything.
+
+### Features
+
+* drop the notice/canonicalUrl feature ([6f260dd](https://github.com/1dot5/zenn-syndicate/commit/6f260ddfce99eca0d65a51418e82170f5b8aa217))
+
+
+### Bug Fixes
+
+* drop the unused sharp optional dependency ([578c46a](https://github.com/1dot5/zenn-syndicate/commit/578c46ad1f3cb8ed753e02679e3e9f5f9f04f9eb))
+
 ## [0.2.0](https://github.com/1dot5/zenn-syndicate/compare/zenn-syndicate-v0.1.0...zenn-syndicate-v0.2.0) (2026-08-30)
 
 
