@@ -49,15 +49,16 @@ jobs:
       - name: Smoke test CLI from packed tarball
         run: |
           set -euo pipefail
-          mkdir -p /tmp/pkg-extract /tmp/zs-smoke
           tgz=$(ls /tmp/pkg/*.tgz | head -n 1)
-          tar -xzf "$tgz" -C /tmp/pkg-extract
+          mkdir -p /tmp/zs-smoke
           cd /tmp/zs-smoke
-          node /tmp/pkg-extract/package/dist/cli.js init
+          npm init -y >/dev/null
+          npm install "$tgz" >/dev/null
+          npx zenn-syndicate init
           test -f zenn-syndicate.config.mjs
           test -f .github/workflows/sync-zenn.yml
           # Re-running must be idempotent (no overwrite).
-          node /tmp/pkg-extract/package/dist/cli.js init
+          npx zenn-syndicate init
 
   release-please:
     needs: ci
