@@ -1,6 +1,6 @@
 {
   "name": "@1dot5/zenn-syndicate",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Convert Markdown articles from anywhere into Zenn-ready front matter and assets, and write them into an existing local Zenn repo checkout.",
   "homepage": "https://github.com/1dot5/zenn-syndicate#readme",
   "bugs": {
