@@ -1,0 +1,8 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "@1dot5/zenn-syndicate"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+# Example workflow: convert this repo's articles and push them into your
+# Zenn-connected repo.
+#
+# zenn-syndicate itself never touches git — it only writes files into the
+# path you point `output.dir` at. This workflow does the git work around it:
+# check out the Zenn repo as a second checkout, run `zenn-syndicate build`
+# against it, and commit + push if anything changed.
+#
+# Setup required before this runs:
+#   1. Create a GitHub Personal Access Token (or deploy key) with push access
+#      to your Zenn repo, and add it as a secret in THIS repo, e.g. ZENN_REPO_TOKEN.
+#   2. Set ZENN_REPO below to "<owner>/<zenn-repo-name>".
+#   3. Adjust `output.dir` in your zenn-syndicate.config.mjs to match the
+#      checkout path used below ("./zenn-repo").
+name: Sync to Zenn
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      ZENN_REPO: owner/your-zenn-repo # <-- change this
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+
+      - name: Checkout Zenn repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.ZENN_REPO }}
+          token: ${{ secrets.ZENN_REPO_TOKEN }}
+          path: zenn-repo
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Zenn articles
+        run: npx zenn-syndicate build
+
+      - name: Commit and push if anything changed
+        working-directory: zenn-repo
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git status --porcelain | grep -q .; then
+            git add -A
+            git commit -m "sync: update articles from source repo"
+            git push
+          else
+            echo "No changes to sync."
+          fi

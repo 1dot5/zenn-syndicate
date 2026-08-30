@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: pnpm install
+
+      - run: pnpm run typecheck
+
+      - run: pnpm run lint
+
+      - run: pnpm run format:check
+
+      - run: pnpm test
+
+      - run: pnpm run build
+
+      - name: Verify package contents
+        run: |
+          set -euo pipefail
+          pnpm pack --pack-destination /tmp/pkg
+          tgz=$(ls /tmp/pkg/*.tgz | head -n 1)
+          echo "Package: $tgz"
+          tar -tzf "$tgz"
+
+      - name: Smoke test CLI from packed tarball
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pkg-extract /tmp/zs-smoke
+          tgz=$(ls /tmp/pkg/*.tgz | head -n 1)
+          tar -xzf "$tgz" -C /tmp/pkg-extract
+          cd /tmp/zs-smoke
+          node /tmp/pkg-extract/package/dist/cli.js init
+          test -f zenn-syndicate.config.mjs
+          test -f .github/workflows/sync-zenn.yml
+          # Re-running must be idempotent (no overwrite).
+          node /tmp/pkg-extract/package/dist/cli.js init
+
+  release-please:
+    needs: ci
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  publish:
+    needs: [ci, release-please]
+    if: ${{ github.event_name == 'push' && needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    environment:
+      name: npm-publish
+      url: https://www.npmjs.com/package/@1dot5/zenn-syndicate
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install
+
+      - run: pnpm run build
+
+      - run: pnpm publish --no-git-checks --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

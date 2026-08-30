@@ -1,0 +1,66 @@
+{
+  "name": "@1dot5/zenn-syndicate",
+  "version": "0.1.0",
+  "description": "Convert Markdown articles from anywhere into Zenn-ready front matter and assets, and write them into an existing local Zenn repo checkout.",
+  "homepage": "https://github.com/1dot5/zenn-syndicate#readme",
+  "bugs": {
+    "url": "https://github.com/1dot5/zenn-syndicate/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1dot5/zenn-syndicate.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "zenn-syndicate": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint src test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "picocolors": "^1.1.1",
+    "tinyglobby": "^0.2.10",
+    "yaml": "^2.6.1"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "oxlint": "^0.15.7",
+    "prettier": "^3.4.2",
+    "tsdown": "^0.15.6",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
