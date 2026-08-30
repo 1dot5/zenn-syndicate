@@ -1,42 +1,39 @@
 # @1dot5/zenn-syndicate
 
-Write Markdown articles anywhere — a blog repo, an Obsidian vault, wherever —
-and convert them into [Zenn](https://zenn.dev)-ready articles (front matter,
-image paths, an optional syndication notice), written into an **existing**
-local checkout of your Zenn-connected repo.
+好きな場所（ブログ用リポジトリ、Obsidian vaultなど）に書いたMarkdown記事を、
+[Zenn](https://zenn.dev) が読み込める形式（front matter・画像パス・任意の転載通知）に変換し、
+**既に存在する**ローカルのZenn連携用リポジトリのチェックアウトへ書き出すツールです。
 
-This package only writes files. It never creates, clones, commits, or pushes
-a repo — that stays yours to do (manually, or with the sample GitHub Actions
-workflow below).
+このパッケージはファイルを書き出すだけです。リポジトリの作成・clone・commit・push は一切行いません
+（それらはあなた自身、または後述のGitHub Actionsサンプルワークフローが行います）。
 
-## Install
+## インストール
 
 ```sh
 npm install --save-dev @1dot5/zenn-syndicate
 ```
 
-Requires Node.js 20+.
+Node.js 20以上が必要です。
 
-## Quick start
+## クイックスタート
 
 ```sh
 npx zenn-syndicate init
 ```
 
-This creates:
+以下が生成されます:
 
-- `zenn-syndicate.config.mjs` — your configuration
-- `.github/workflows/sync-zenn.yml` — a sample CI workflow (see below)
+- `zenn-syndicate.config.mjs` — 設定ファイル
+- `.github/workflows/sync-zenn.yml` — サンプルのCIワークフロー（後述）
 
-Edit the config to point at your source articles and an existing local
-checkout of your Zenn repo, then:
+設定ファイルを編集して、記事の置き場所と、既存のZennリポジトリのローカルチェックアウトパスを指定したら:
 
 ```sh
-npx zenn-syndicate check   # validate only, writes nothing
-npx zenn-syndicate build   # convert and write into output.dir
+npx zenn-syndicate check   # 検証のみ。何も書き出さない
+npx zenn-syndicate build   # 変換して output.dir に書き出す
 ```
 
-## Configuration
+## 設定ファイル
 
 ```js
 // zenn-syndicate.config.mjs
@@ -44,49 +41,47 @@ import { defineConfig } from "@1dot5/zenn-syndicate";
 
 export default defineConfig({
   source: {
-    dir: "content/articles", // where your Markdown articles live
-    include: ["**/*.md"], // globs, relative to source.dir
+    dir: "content/articles", // Markdown記事が置かれているディレクトリ
+    include: ["**/*.md"], // source.dir からの相対glob
   },
   output: {
-    // Path to an EXISTING local checkout of your Zenn repo.
+    // 既に存在するZennリポジトリのローカルチェックアウトパス
     dir: "../my-zenn-repo",
-    articlesDir: "articles", // relative to output.dir
-    imagesDir: "images", // relative to output.dir
+    articlesDir: "articles", // output.dir からの相対
+    imagesDir: "images", // output.dir からの相対
   },
   defaults: {
-    type: "tech", // "tech" | "idea", used when an article omits `type`
+    type: "tech", // "tech" | "idea"。記事側で省略された場合に使われる
     published: false,
     topics: [],
   },
   notice: {
     enabled: true,
-    // {sourceUrl} is replaced with the article's `canonicalUrl` front
-    // matter field. If an article has no canonicalUrl, the notice is
-    // skipped for that article (and an info diagnostic is reported).
+    // {sourceUrl} は記事の front matter の canonicalUrl に置換される。
+    // canonicalUrl が無い記事ではnotice全体を挿入しない（info診断を出す）
     text: "この記事は {sourceUrl} で公開したものをZenn向けに変換しています。",
   },
   lockFile: ".zenn-syndicate.lock.json",
 });
 ```
 
-`source.dir` and `output.dir` are required; `output.dir` must already exist
-(the build fails fast, exit code `2`, if it doesn't). Everything else has a
-default.
+`source.dir` と `output.dir` は必須です。`output.dir` は事前に存在している必要があります
+（存在しない場合はビルドがすぐに失敗し、終了コードは `2` になります）。それ以外はすべてデフォルト値があります。
 
-## Writing an article
+## 記事の書き方
 
-Any Markdown file under `source.dir` matching `source.include` is a source
-article. Front matter fields:
+`source.dir` 配下で `source.include` にマッチするMarkdownファイルはすべてソース記事として扱われます。
+front matterのフィールドは以下の通りです。
 
-| field          | required | notes                                                                        |
-| -------------- | -------- | ---------------------------------------------------------------------------- |
-| `title`        | yes      | non-empty string                                                             |
-| `emoji`        | yes      | exactly one emoji character                                                  |
-| `type`         | no       | `"tech"` \| `"idea"`, defaults to `defaults.type`                            |
-| `topics`       | no       | array of strings, max 5, defaults to `defaults.topics`                       |
-| `published`    | no       | boolean, defaults to `defaults.published`                                    |
-| `slug`         | no       | must match `/^[0-9a-z-_]{12,50}$/`; auto-derived from the filename otherwise |
-| `canonicalUrl` | no       | used to fill `{sourceUrl}` in the notice                                     |
+| フィールド     | 必須 | 説明                                                                       |
+| -------------- | ---- | -------------------------------------------------------------------------- |
+| `title`        | 必須 | 空でない文字列                                                             |
+| `emoji`        | 必須 | 絵文字1文字ちょうど                                                        |
+| `type`         | 任意 | `"tech"` \| `"idea"`。省略時は `defaults.type`                             |
+| `topics`       | 任意 | 文字列配列、最大5個。省略時は `defaults.topics`                            |
+| `published`    | 任意 | 真偽値。省略時は `defaults.published`                                      |
+| `slug`         | 任意 | `/^[0-9a-z-_]{12,50}$/` に一致する必要あり。省略時はファイル名から自動生成 |
+| `canonicalUrl` | 任意 | notice内の `{sourceUrl}` に使われる                                        |
 
 ```md
 ---
@@ -103,16 +98,15 @@ canonicalUrl: "https://blog.example.com/faster-typescript-builds"
 ![説明](./images/before-after.png)
 ```
 
-Local images referenced with `![alt](path)` are resolved relative to the
-article's own directory, copied into
-`output.dir/<imagesDir>/<slug>/<filename>`, and the reference is rewritten to
-Zenn's root-relative form (`/images/<slug>/<filename>`). References inside
-fenced code blocks or inline code spans are left untouched, and remote
-(`http(s)://`, `data:`) images are never rewritten.
+`![alt](path)` で参照されたローカル画像は、記事ファイル自身のディレクトリからの相対パスとして解決され、
+`output.dir/<imagesDir>/<slug>/<ファイル名>` にコピーされます。本文中の参照は
+Zennのルート相対形式（`/images/<slug>/<ファイル名>`）に書き換えられます。
+フェンスドコードブロックやインラインコードスパンの中にある参照は書き換えません。
+また、リモート画像（`http(s)://`、`data:`）は一切書き換えません。
 
-Front matter is written as a hand-built string, not through a YAML dumper —
-common YAML libraries escape emoji into `\uXXXX`/`\UXXXXXXXX` sequences,
-which breaks how Zenn renders the `emoji` field.
+front matterはYAMLライブラリのdumpを使わず、文字列を組み立てて出力します。
+一般的なYAMLライブラリは絵文字を `\uXXXX` / `\UXXXXXXXX` のようにエスケープすることがあり、
+Zenn側で `emoji` フィールドの表示が壊れてしまうためです。
 
 ## CLI
 
@@ -122,14 +116,11 @@ zenn-syndicate build   [--config <path>] [--json] [--dry-run]
 zenn-syndicate check   [--config <path>] [--json]
 ```
 
-- `init` — creates the config file and sample workflow if they don't already
-  exist (skips, without overwriting, otherwise).
-- `build` — converts and writes into `output.dir`. `--dry-run` runs the full
-  pipeline and reports the same diagnostics, but skips writing anything.
-- `check` — same validation as `build`, but never writes (equivalent to
-  always running with `--dry-run`).
+- `init` — 設定ファイルとサンプルワークフローを、まだ無ければ生成する（既にあれば上書きせずスキップ）
+- `build` — 変換して `output.dir` に書き出す。`--dry-run` を付けると、同じ検証・レポートを行うが書き込みだけスキップする
+- `check` — `build` と同じ検証を行うが、常に何も書き込まない（`--dry-run` を常に付けた `build` と同等）
 
-`--json` prints the report as JSON instead of colorized text:
+`--json` を付けると、色付きテキストの代わりにJSONでレポートを出力します:
 
 ```json
 {
@@ -144,29 +135,28 @@ zenn-syndicate check   [--config <path>] [--json]
 }
 ```
 
-### Exit codes
+### 終了コード
 
-| code | meaning                                                                                            |
-| ---- | -------------------------------------------------------------------------------------------------- |
-| `0`  | success, no errors                                                                                 |
-| `1`  | one or more articles had errors and were skipped; everything else was processed normally           |
-| `2`  | fatal — config couldn't be loaded, or `output.dir`/`source.dir` doesn't exist; nothing was written |
+| コード | 意味                                                                                                            |
+| ------ | --------------------------------------------------------------------------------------------------------------- |
+| `0`    | 成功。エラーなし                                                                                                |
+| `1`    | 1件以上の記事でエラーが発生しスキップされた。それ以外の記事は通常通り処理された                                 |
+| `2`    | 致命的エラー。設定ファイルが読み込めない、または `output.dir`/`source.dir` が存在しない。何も書き出されていない |
 
-A build never stops at the first error — every article is processed, and all
-findings are reported together so you can fix everything in one pass.
+ビルドは最初のエラーで止まりません。全記事を処理しきってから、すべての結果をまとめて報告します。
+1回の実行で全部の問題を直せるようにするためです。
 
-## How change detection works
+## 差分検出の仕組み
 
-Every build records a content hash per article (and per image) in the lock
-file (`lockFile` in config, default `.zenn-syndicate.lock.json`). An
-unchanged article is skipped on the next build (reported as `unchanged`,
-info level). If a source article disappears, its previously generated output
-is **not** deleted automatically — you'll get an `orphaned-output` warning
-instead, so you can decide.
+ビルドのたびに、記事ごと（および画像ごと）のコンテンツハッシュがロックファイル
+（設定の `lockFile`、デフォルトは `.zenn-syndicate.lock.json`）に記録されます。
+変更が無い記事は次回ビルドでスキップされます（`unchanged` というinfoレベルの診断が出ます）。
+ソース記事が削除された場合、以前生成した出力ファイルは**自動削除されません**。
+代わりに `orphaned-output` という警告が出るので、対応はあなたが判断してください。
 
-`--dry-run` and `check` never update the lock file.
+`--dry-run` と `check` はロックファイルを更新しません。
 
-## Using it as a library
+## ライブラリとして使う
 
 ```ts
 import { build, check, defineConfig } from "@1dot5/zenn-syndicate";
@@ -174,25 +164,22 @@ import { build, check, defineConfig } from "@1dot5/zenn-syndicate";
 const { report, exitCode } = await build({ configPath: "./zenn-syndicate.config.mjs" });
 ```
 
-`build`/`check` both return `{ report, exitCode }`; `report.diagnostics` and
-`report.summary` match the `--json` shape above.
+`build`/`check` はどちらも `{ report, exitCode }` を返します。`report.diagnostics` と
+`report.summary` は上記の `--json` の形式と一致します。
 
 ## GitHub Actions
 
-`zenn-syndicate` itself never touches git. `npx zenn-syndicate init` also
-generates `.github/workflows/sync-zenn.yml`, a starting point that:
+`zenn-syndicate` 自体はgit操作を一切行いません。`npx zenn-syndicate init` は
+`.github/workflows/sync-zenn.yml` も生成します。これは以下を行うサンプルです:
 
-1. Checks out your source repo.
-2. Checks out your Zenn repo as a second checkout (needs a token with push
-   access, stored as a secret).
-3. Runs `npx zenn-syndicate build` against that checkout.
-4. Commits and pushes, with plain `git` commands, only if something changed.
+1. ソースリポジトリをチェックアウトする
+2. Zennリポジトリを別途チェックアウトする（push権限のあるトークンをsecretとして必要とする）
+3. そのチェックアウトに対して `npx zenn-syndicate build` を実行する
+4. 変更があった場合のみ、素の `git` コマンドでcommit・pushする
 
-Edit the `ZENN_REPO` env var and add the token secret it references before
-enabling the workflow.
+有効化する前に、`ZENN_REPO` 環境変数と、参照しているトークンのsecretを設定してください。
 
-## Scope
+## スコープ
 
-Not covered in v1: Zenn Books, other publishing targets (the `Target` type
-leaves room for one, but only `"zenn"` exists today), and image
-optimization/resizing.
+v1では以下は対象外です: Zenn Books、他媒体への対応（`Target` 型に余地は残していますが
+`"zenn"` のみ実装済み）、画像の最適化・リサイズ。
