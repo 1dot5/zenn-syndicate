@@ -170,8 +170,3 @@ const { report, exitCode } = await build({ configPath: "./zenn-syndicate.config.
 4. 変更があった場合のみ、素の `git` コマンドでcommit・pushする
 
 有効化する前に、`ZENN_REPO` 環境変数と、参照しているトークンのsecretを設定してください。
-
-## スコープ
-
-v1では以下は対象外です: Zenn Books、他媒体への対応（`Target` 型に余地は残していますが
-`"zenn"` のみ実装済み）、画像の最適化・リサイズ。
