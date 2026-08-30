@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/1dot5/zenn-syndicate/compare/zenn-syndicate-v0.3.0...zenn-syndicate-v0.3.1) (2026-08-30)
+
+
+### Bug Fixes
+
+* remove SPEC.md ([78ade91](https://github.com/1dot5/zenn-syndicate/commit/78ade9106a8ee5a0ce12b1d861b6b294d428f93a))
+
 ## [0.3.0](https://github.com/1dot5/zenn-syndicate/compare/zenn-syndicate-v0.2.0...zenn-syndicate-v0.3.0) (2026-08-30)
 
 
